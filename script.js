@@ -94,6 +94,29 @@
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   onScroll();
 
+  // Showroom orbit: build planets from the store cards
+  const orbit = document.querySelector('.orbit');
+  if (orbit) {
+    const stores = [...document.querySelectorAll('.store')];
+    const rings = [orbit.querySelector('.r1'), orbit.querySelector('.r2')];
+    const inner = Math.round(stores.length * 0.4);
+    const groups = [stores.slice(0, inner), stores.slice(inner)];
+    groups.forEach((g, gi) => g.forEach((card, i) => {
+      if (!card.id) card.id = 'store-' + card.querySelector('h3').textContent.trim().toLowerCase().replace(/[^a-z]+/g, '-');
+      const p = document.createElement('div');
+      p.className = 'planet';
+      p.style.setProperty('--a', (i * 360 / g.length + gi * 22) + 'deg');
+      const b = document.createElement('span'); b.className = 'pl-body';
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'pl-btn'; btn.tabIndex = -1;
+      btn.innerHTML = '<i></i>' + card.querySelector('h3').textContent.trim();
+      btn.addEventListener('click', () => {
+        card.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+        card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 2200);
+      });
+      b.appendChild(btn); p.appendChild(b); rings[gi].appendChild(p);
+    }));
+  }
+
   const yr = document.getElementById('yr');
   if (yr) yr.textContent = new Date().getFullYear();
 })();
