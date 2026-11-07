@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ramesh-choudhary.vercel.app/sitemap.xml
+Sitemap: https://mr-ramesh-choudhary-exposys.vercel.app/sitemap.xml
