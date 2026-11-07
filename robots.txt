@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ramesh-choudhary.vercel.app/sitemap.xml
