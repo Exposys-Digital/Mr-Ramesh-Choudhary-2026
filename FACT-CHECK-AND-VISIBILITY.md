@@ -24,7 +24,7 @@ Still needed: exact date of birth, if he wants it public.
 | Company incorporated 28 Dec 2017, RoC Pune, registered at Kasturi Plaza, Thermax Chowk, Chinchwad, Pune 411039; formerly "Mr Surya Eletromart Ind Pvt Ltd" | Registry data | Registry |
 | Surya Electronics founded 2001 from a 200 sq ft shop | Consistent across MyNation, TradeFlock, Hashtechy, own site. **All trace back to his own account.** | [2][3] |
 | ₹1 crore first-year turnover; ₹300 crore turnover in 2024 | Reported by MyNation (Nov 2024). Not independently audited. Registry financials are paywalled. | [2] |
-| 11 stores (10 Pune + 1 Satara), 300+ staff, ~1 lakh sq ft | TradeFlock interview + own site | [1][3] |
+| **13 showrooms** (12 in Pune district + Phaltan, Satara district), confirmed by the client and the official store locator, 7 Nov 2026. Older sources said 11. 300+ staff, ~1 lakh sq ft | Store locator; TradeFlock interview | [3][8] |
 | Childhood: cattle herding, 5 km walk, married at 10, addiction at 14, Jain-school hostel, Class 10/12 with grace marks, cycling 50 km/day, Pawan Electronics at ₹1,500/month, father-in-law loan | Self-reported, repeated in MyNation | [2][3] |
 | 2008 Bajaj Finance EMI partnership | MyNation | [2] |
 | Wife completed Executive MBA at IIM Ahmedabad | MyNation | [2] |

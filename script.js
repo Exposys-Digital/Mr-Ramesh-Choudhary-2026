@@ -94,27 +94,87 @@
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   onScroll();
 
-  // Showroom orbit: build planets from the store cards
-  const orbit = document.querySelector('.orbit');
-  if (orbit) {
-    const stores = [...document.querySelectorAll('.store')];
-    const rings = [orbit.querySelector('.r1'), orbit.querySelector('.r2')];
-    const inner = Math.round(stores.length * 0.4);
-    const groups = [stores.slice(0, inner), stores.slice(inner)];
-    groups.forEach((g, gi) => g.forEach((card, i) => {
-      if (!card.id) card.id = 'store-' + card.querySelector('h3').textContent.trim().toLowerCase().replace(/[^a-z]+/g, '-');
-      const p = document.createElement('div');
-      p.className = 'planet';
-      p.style.setProperty('--a', (i * 360 / g.length + gi * 22) + 'deg');
-      const b = document.createElement('span'); b.className = 'pl-body';
-      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'pl-btn'; btn.tabIndex = -1;
-      btn.innerHTML = '<i></i>' + card.querySelector('h3').textContent.trim();
-      btn.addEventListener('click', () => {
-        card.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
-        card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 2200);
+  // Showroom growth road (scroll-driven)
+  const road = document.getElementById('road');
+  if (road) {
+    const stage = road.querySelector('.road-stage');
+    const svg = road.querySelector('.road-svg');
+    const marksEl = road.querySelector('.road-marks');
+    const van = road.querySelector('.van');
+    const start = road.querySelector('.road-start');
+    const countEl = road.querySelector('[data-road-count]');
+    const cards = [...document.querySelectorAll('.store')];
+    const NS = 'http://www.w3.org/2000/svg';
+    let lane, L = 0, marks = [], vert = false;
+    const build = () => {
+      const w = stage.clientWidth, h = stage.clientHeight;
+      vert = w < 760;
+      road.classList.toggle('vert', vert);
+      const pts = [];
+      for (let i = 0; i <= 160; i++) {
+        const t = i / 160;
+        pts.push(vert
+          ? [w * 0.5 + Math.sin(t * Math.PI * 2.4) * w * 0.2, h * 0.24 + t * h * 0.66]
+          : [w * 0.1 + t * w * 0.82, h * 0.6 + Math.sin(t * Math.PI * 2.2) * h * 0.17 - t * h * 0.1]);
+      }
+      const d = 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L');
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      svg.innerHTML = `<defs><linearGradient id="roadGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${w}" y2="${h}"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#ff7a1a"/></linearGradient></defs>
+        <path class="bed" d="${d}"/><path class="lane" d="${d}"/><path class="dash" d="${d}"/>`;
+      lane = svg.querySelector('.lane');
+      L = lane.getTotalLength();
+      lane.style.strokeDasharray = L;
+      const p0 = lane.getPointAtLength(0);
+      start.style.left = (vert ? p0.x : p0.x) + 'px';
+      start.style.top = (vert ? p0.y - 14 : p0.y - 26) + 'px';
+      marksEl.innerHTML = '';
+      marks = cards.map((card, i) => {
+        if (!card.id) card.id = 'store-' + card.querySelector('h3').textContent.trim().toLowerCase().replace(/[^a-z]+/g, '-');
+        const f = 0.07 + i * (0.88 / Math.max(1, cards.length - 1));
+        const pt = lane.getPointAtLength(f * L);
+        const m = document.createElement('div');
+        const up = i % 2 === 0;
+        m.className = 'mark ' + (vert ? (pt.x > stage.clientWidth / 2 ? 'left' : 'right') : (up ? 'up' : 'down'));
+        m.style.left = pt.x + 'px'; m.style.top = pt.y + 'px';
+        m.style.setProperty('--h', (up ? 54 + (i % 4) * 8 : 48 + (i % 3) * 10) + 'px');
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'pl-btn';
+        btn.innerHTML = '<i></i>' + card.querySelector('h3').textContent.trim();
+        btn.setAttribute('aria-label', 'Show address of the ' + card.querySelector('h3').textContent.trim() + ' showroom');
+        btn.addEventListener('click', () => {
+          card.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+          card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 2200);
+        });
+        m.innerHTML = '<span class="stem"></span><span class="dot"></span>';
+        m.appendChild(btn); marksEl.appendChild(m);
+        return { el: m, f };
       });
-      b.appendChild(btn); p.appendChild(b); rings[gi].appendChild(p);
-    }));
+      update();
+    };
+    const update = () => {
+      if (!lane) return;
+      let p;
+      if (reduce) p = 1;
+      else {
+        const r = road.getBoundingClientRect();
+        const span = road.offsetHeight - stage.clientHeight;
+        p = Math.min(1, Math.max(0, -r.top / (span * 0.85)));
+      }
+      const len = p * L;
+      lane.style.strokeDashoffset = L - len;
+      const a = lane.getPointAtLength(Math.max(0, len - 1)), b = lane.getPointAtLength(Math.min(L, len + 1));
+      const ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+      const pt = lane.getPointAtLength(len);
+      van.style.transform = `translate(${pt.x}px, ${pt.y}px) rotate(${ang}deg)`;
+      let n = 0, last = -1;
+      marks.forEach((m, i) => { const on = m.f <= p + 0.001; m.el.classList.toggle('on', on); if (on) { n++; last = i; } });
+      marks.forEach((m, i) => m.el.classList.toggle('hot', i === last && p < 1));
+      countEl.textContent = n;
+    };
+    let raf = 0;
+    addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; update(); }); }, { passive: true });
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+    build();
   }
 
   const yr = document.getElementById('yr');
